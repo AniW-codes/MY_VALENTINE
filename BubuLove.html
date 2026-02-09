@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For You 💌</title>
+
+  <meta property="og:title" content="A small question for you 💌" />
+  <meta property="og:description" content="Open this when you're free (and in a romantic mood)." />
+  <meta property="og:type" content="website" />
+
+  <style>
+    :root { --bg1:#fff1f6; --bg2:#f3f7ff; --card:#ffffffcc; --text:#111827; }
+    *{box-sizing:border-box;font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;}
+
+    body{
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background:
+        radial-gradient(circle at 20% 10%, var(--bg1), transparent 45%),
+        radial-gradient(circle at 80% 30%, var(--bg2), transparent 45%),
+        linear-gradient(180deg, #ffffff, #fff7fb);
+      overflow:hidden; color:var(--text);
+    }
+
+    .card{
+      width:min(760px, 92vw);
+      background:var(--card);
+      border:1px solid #ffffff;
+      backdrop-filter: blur(10px);
+      border-radius:24px;
+      padding:28px;
+      box-shadow: 0 20px 60px rgba(17,24,39,.12);
+      position:relative;
+      text-align:left;
+    }
+
+    h1{margin:0 0 10px; font-size:clamp(28px,4vw,42px); letter-spacing:-0.02em;}
+    p{margin:0 0 18px; line-height:1.7; font-size:clamp(15px,2.2vw,17px); opacity:.92;}
+
+    .divider{height:1px; background:rgba(17,24,39,.08); margin:16px 0 18px;}
+
+    .btns{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+      margin-top:10px; position:relative;
+    }
+
+    button{
+      border:0; padding:12px 16px; border-radius:14px; cursor:pointer;
+      font-weight:800; font-size:16px;
+      box-shadow: 0 10px 24px rgba(17,24,39,.10);
+      transition: transform .2s ease, filter .2s ease;
+    }
+
+    #yes{
+      background:#111827; color:white;
+      animation: pulse 0.2s ease-in-out infinite;
+    }
+
+    #yes:hover{
+      filter:brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    @keyframes pulse {
+      0%,100% { transform:translateY(0); }
+      50% { transform:translateY(-2px); }
+    }
+
+    #no{
+      background:white; color:#111827;
+      border:1px solid #e5e7eb;
+      position:relative;
+      transition: transform 0.25s ease;
+    }
+
+    /* Floating hearts */
+    .heart{
+      position:absolute; width:18px; height:18px;
+      transform:rotate(45deg);
+      background:#ff4d6d; border-radius:4px; opacity:.22;
+      animation: floatUp linear infinite;
+      pointer-events:none;
+    }
+    .heart::before,.heart::after{
+      content:""; position:absolute;
+      width:18px; height:18px; border-radius:50%;
+      background:#ff4d6d;
+      top:-9px; left:0;
+    }
+    .heart::after{left:-9px; top:0;}
+
+    @keyframes floatUp{
+      from{ transform:translateY(40px) rotate(45deg); }
+      to{ transform:translateY(-120vh) rotate(45deg); }
+    }
+
+    /* Modal */
+    .modal{
+      position:fixed; inset:0;
+      display:none; align-items:center; justify-content:center;
+      background: rgba(17,24,39,.45);
+      padding:18px;
+    }
+    .modalInner{
+      width:min(560px, 92vw);
+      background:white;
+      border-radius:22px;
+      padding:22px;
+      box-shadow: 0 20px 70px rgba(0,0,0,.25);
+      text-align:center;
+    }
+    .big{font-size: clamp(20px, 3.3vw, 30px); margin: 6px 0 10px; font-weight:900;}
+    .small{opacity:.86; margin:0 0 14px; line-height:1.6;}
+
+    canvas{position:fixed; inset:0; pointer-events:none;}
+  </style>
+</head>
+
+<body>
+  <canvas id="confetti"></canvas>
+
+  <div class="card">
+    <h1>Hellooooo my <span id="herName">Puja Rani Bubu</span> 💌</h1>
+
+    <p>
+      I wanted to ask you in a way you could keep and not just a message that disappears in chat.
+      <br><br>
+      You make my days softer, my heart calmer, and my life happier.
+      <br><br>
+      So here’s my little question…
+    </p>
+
+    <div class="divider"></div>
+
+    <h1>Will you be my Valentine? 💘</h1>
+
+    <div class="btns">
+      <button id="yes">Yes, I’ll be your Valentine 💖</button>
+      <button id="no">No 🙈</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modalInner">
+      <div class="big">You just made me the happiest person 🥹💘</div>
+      <p class="small">
+        Thank you BUBU 💖. You know I miss you!  
+        This was my little attempt to steal a smile from you. I hope it worked.
+      </p>
+      <button id="closeBtn">Close</button>
+    </div>
+  </div>
+
+<script>
+  // Personalise name via ?name=Puja
+  const params = new URLSearchParams(location.search);
+  const name = params.get("name");
+  if (name) document.getElementById("herName").textContent = name;
+
+  // Floating hearts
+  function spawnHeart(){
+    const h = document.createElement("div");
+    h.className = "heart";
+    const left = Math.random()*100;
+    const dur = 6 + Math.random()*6;
+    const size = 10 + Math.random()*18;
+    h.style.left = left + "vw";
+    h.style.bottom = "-40px";
+    h.style.animationDuration = dur + "s";
+    h.style.width = h.style.height = size + "px";
+    h.style.opacity = 0.12 + Math.random()*0.25;
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(), dur*1000);
+  }
+  setInterval(spawnHeart, 280);
+
+  // Confetti
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+  addEventListener("resize", resize); resize();
+
+  let confetti = [];
+  function burst(){
+    confetti = [];
+    for(let i=0;i<220;i++){
+      confetti.push({
+        x: innerWidth/2, y: innerHeight/2,
+        vx:(Math.random()-0.5)*14,
+        vy:(Math.random()-0.9)*14,
+        r:3+Math.random()*4,
+        a:1, rot:Math.random()*Math.PI
+      });
+    }
+    requestAnimationFrame(tick);
+  }
+  function tick(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    confetti.forEach(p=>{
+      p.vy+=0.25; p.x+=p.vx; p.y+=p.vy; p.a-=0.008;
+      ctx.globalAlpha=Math.max(p.a,0);
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);
+      ctx.restore();
+    });
+    ctx.globalAlpha=1;
+    confetti=confetti.filter(p=>p.a>0 && p.y<innerHeight+40);
+    if(confetti.length) requestAnimationFrame(tick);
+  }
+
+  const modal = document.getElementById("modal");
+  document.getElementById("yes").addEventListener("click", ()=>{
+    burst();
+    modal.style.display="flex";
+  });
+  document.getElementById("closeBtn").addEventListener("click", ()=>{
+    modal.style.display="none";
+  });
+
+  // No button dodges
+  const noBtn = document.getElementById("no");
+  noBtn.addEventListener("mouseenter", ()=>{
+    const x=(Math.random()*180)-90;
+    const y=(Math.random()*90)-45;
+    noBtn.style.transform=`translate(${x}px, ${y}px)`;
+  });
+</script>
+</body>
+</html>
